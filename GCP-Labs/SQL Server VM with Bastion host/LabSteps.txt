@@ -1,0 +1,153 @@
+Lab:
+https://www.cloudskillsboost.google/focuses/1737
+
+Date of Lab Execution:
+Nov 2024
+
+Challenge scenario
+Your company has decided to deploy new application services in the cloud and your assignment is developing a secure framework for managing the Windows services that will be deployed. You will need to create a new VPC network environment for the secure production Windows servers.
+
+Production servers must initially be completely isolated from external networks and cannot be directly accessed from, or be able to connect directly to, the internet. In order to configure and manage your first server (SQL Server) in this environment, you will also need to deploy a bastion host, or jump box, that can be accessed from the internet using the Microsoft Remote Desktop Protocol (RDP). The bastion host should only be accessible via RDP from the internet, and should only be able to communicate with the other compute instances inside the VPC network using RDP.
+
+Your company also has a monitoring system running from the default VPC network, so all compute instances must have a second network interface with an internal only connection to the default VPC network.
+
+#######
+Your challenge
+Deploy the secure Windows machine that is not configured for external communication inside a new VPC subnet, then deploy the Microsoft Internet Information Server on that secure machine. For the purposes of this lab, all resources should be provisioned in the following region and zone:
+
+Region: us-east1
+Zone: zone
+Tasks
+The key tasks are listed below. Good luck!
+
+Create a new VPC network with a single subnet.
+Create a firewall rule that allows external RDP traffic to the bastion host system.
+Deploy two Windows servers that are connected to both the VPC network and the default network.
+    BF Edit: deploy 1 Windows SQL Server
+Create a virtual machine that points to the startup script.
+Configure a firewall rule to allow HTTP access to the virtual machine.
+
+#######
+Task 1. 
+Create the VPC network
+Create a new VPC network called securenetwork.
+
+Task 2. 
+Create a new VPC subnet inside securenetwork in the us-east1 region.
+
+
+      - create VPC  Network
+                   Name :- securenetwork
+				     sub-network-1 : secure-sub1
+					 IP_address : 10.0.0.0/24
+					 Region : us-east1
+					 
+					 sub-network-2 :- 
+					 IP_address :- 
+					 Region :- 
+					 
+		|-Click on Create-|
+------------------------------------------------------------------------------------------------------------------------------------		
+
+Task 3:
+Once the network and subnet have been configured, configure a firewall rule that allows inbound RDP traffic (TCP port 3389) from the internet to the bastion host. This rule should be applied to the appropriate host using network tags.
+
+/****************
+PRE-EXISTING RESOURCE FOR THE LAB
+
+        Compute Engine Instance: lab-monitor
+        Zone: us-east1-c
+        Internal IP: 10.142.0.2 (nic0)
+        External IP: 34.73.124.68 (nic0)
+        Labels: goog-terraform-provisioned: true
+        Machine Type: e2-small
+        Boot disk: debian-11
+
+****************/
+
+From Gemini:
+    Configuring a Firewall Rule in GCP to Allow Inbound RDP Traffic
+
+    To configure a firewall rule in GCP to allow inbound RDP traffic (TCP port 3389) from the internet to a bastion host using network tags, follow these steps:
+
+    Before you can attach a tag, you need to create a tag and configure its value. 
+    To create tag keys and tag values, see Creating a tag and Adding a tag value.
+
+
+    1. Create a Network Tag Key:
+
+    Navigate to the Network Tags page in the Google Cloud Console (under IAM).
+    Click Create Network Tag Key.
+    Give the tag a name, such as bastion-host.
+    Click "For use with network firewall"
+        -> Choose project and network
+    
+    Click "Create Tag Key"
+
+    2. Create tag value (still within IAM\Tags)
+
+
+
+
+    2. Assign the Network Tag to the Bastion Host:
+    Navigate to the Compute Engine page.
+    Select the bastion host instance.
+    In the Network Interfaces section, add the bastion-host network tag to the instance.
+    3. Create a Firewall Rule:
+
+    Navigate to the Firewall page.
+    Click Create Firewall Rule.
+    Give the rule a name, such as Allow RDP to Bastion Host.
+    Source IP Ranges: Set this to 0.0.0.0/0 to allow traffic from any IP address.
+    Target Tags: Select the bastion-host network tag.
+    Specified Protocols and Ports: Add a rule for tcp:3389 to allow RDP traffic.
+    Action: Set this to Allow.
+    Priority: Set a priority for the rule. A lower priority number indicates a higher priority.
+    Additional Considerations:
+
+    Security Best Practices:
+    Consider using a more restrictive source IP range if possible, such as allowing traffic only from specific IP addresses or networks.
+    Implement strong password policies and multi-factor authentication for the bastion host.
+    Regularly patch and update the bastion host to address security vulnerabilities.
+    Monitor network traffic to the bastion host for unusual activity.
+    Bastion Host Configuration:
+    Ensure the bastion host is configured to allow RDP traffic.
+    Consider using a bastion host solution that provides additional security features, such as session recording and timeouts.
+    Network Segmentation:
+    If possible, consider using network segmentation to isolate the bastion host from other sensitive resources. This can help limit the potential impact of a security breach.
+    By following these steps and considering the additional security best practices, you can effectively configure a firewall rule in GCP to allow inbound RDP traffic to your bastion host while minimizing security risks.
+
+
+
+
+
+###########
+Simpler Task - Create a SQL Server with a hostname, network tag, 
+
+1. Create VM
+    - sql-vm3
+2. Choose image (e.g. SQL Server for Windows)
+3. Go to Advanced Options\networks
+    - Add network tag (e.g. sql-svr)
+    - Create hostname: sql-vm3.bf-sandbox.b5678
+4. Click "Create VM"
+5. Navigate to VM in Google Cloud Console
+    - Click 'Set Windows password'
+    - Accept username (username you are logged into GCP as)
+6. Download RDP file
+7. Open RDP with Microsoft Remote Desktop program
+8. Login to VM
+9. Note - as of this writing, opening the SQL Server Management Studio the first time, you'll try to choose Windows Login, but it won't work.
+    !!! WORKAROUND !!!!
+    Try connecting to the SQL Server instance using the sqlcmd utility from the command line. Open a command prompt as the local administrator and run:
+    
+    sqlcmd -E
+    
+    If you can connect successfully, you can add your user to the SQL Server sysadmin role with:
+
+    CREATE LOGIN [DOMAIN\YourUsername] FROM WINDOWS;
+    ALTER SERVER ROLE [sysadmin] ADD MEMBER [DOMAIN\YourUsername];
+    GO
+    EXIT
+
+    Attempt to login again to SSMS
