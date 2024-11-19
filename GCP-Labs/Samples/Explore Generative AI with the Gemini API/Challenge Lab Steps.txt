@@ -1,0 +1,179 @@
+##################
+Overview
+In a challenge lab you’re given a scenario and a set of tasks. Instead of following step-by-step instructions, you will use the skills learned from the labs in the course to figure out how to complete the tasks on your own! An automated scoring system (shown on this page) will provide feedback on whether you have completed your tasks correctly.
+
+When you take a challenge lab, you will not be taught new Google Cloud concepts. You are expected to extend your learned skills, like changing default values and reading and researching error messages to fix your own mistakes.
+
+To score 100% you must successfully complete all tasks within the time period!
+
+###################
+Challenge Scenario
+As a developer at a pioneering startup specializing in AI-driven video content analysis, you're tasked with harnessing Gemini's cutting-edge capabilities to elevate the platform's functionality. Your mission is to implement three pivotal features using Gemini's APIs: text generation, function calls, and video content analysis.
+
+Your long-term objective is to enhance the platform's capabilities, enabling it to automatically generate coherent and polished text, execute specific actions or commands, and describe video contents using Gemini's state-of-the-art AI capabilities. Your goal for today is to implement demos of these features using Gemini's APIs, ensuring they meet the expected standards before deploying them to production.
+
+Your success in this challenge will not only advance the platform's functionality but also demonstrate your proficiency in leveraging Gemini's state-of-the-art AI capabilities to address real-world problems in the realm of video content analysis. Are you ready to take on the challenge?
+
+###################
+Task 1. Generate text using Gemini
+
+-Open Cloud Shell and install the following python dependencies for this task.
+pip3 install --upgrade --user google-cloud-aiplatform
+
+-Run the following command to set environment variables required.
+PROJECT_ID=qwiklabs-gcp-04-fe7eb8af5d26
+LOCATION=us-east4
+API_ENDPOINT=${LOCATION}-aiplatform.googleapis.com
+MODEL_ID="gemini-1.0-pro"
+
+-Enable the APIs required to call gemini APIs via cloud console.
+ (APIs were already enabled; can do this via GCP Console)
+
+-Call the gemini-1.0-pro LLM via curl in Cloud Shell. Use the following documentation to assist you properly write the curl command: Send Chat Prompts to Gemini. Ask the following question:
+https://cloud.google.com/vertex-ai/docs/generative-ai/multimodal/send-chat-prompts-gemini#send_chat_prompts
+
+For testing and iterating on chat prompts, we recommend using the Google Cloud console. To send prompts programmatically to the model, you can use the REST API, Vertex AI SDK for Python, or one of the other supported libraries and SDKs shown in the following tabs.
+
+After you set up your environment, you can use REST to test a text prompt. The following sample sends a request to the publisher model endpoint.
+
+    ***************************
+    >> Subtask: setup Environment (https://cloud.google.com/vertex-ai/generative-ai/docs/start/quickstarts/quickstart-multimodal#gemini-setup-environment-drest)
+    Set up the SDK for your programming language
+    On your local machine (terminal), click one of the following tabs to install the SDK for your programming language.
+
+    Configure your environment variables by entering the following. Replace PROJECT_ID with the ID of your Google Cloud project.
+
+    MODEL_ID="gemini-1.5-flash-002"
+    PROJECT_ID="qwiklabs-gcp-04-fe7eb8af5d26"
+
+    Use Google Cloud CLI to provision the endpoint by running this command.
+
+    gcloud beta services identity create --service=aiplatform.googleapis.com --project=${PROJECT_ID}
+    ***************************
+
+Save the request body in a file named request.json. Run the following command in the terminal to create or overwrite this file in the current directory:
+
+cat > request.json << 'EOF'
+{
+  "contents": [
+    {
+      "role": "user",
+      "parts": { "text": "What are all the colors in a rainbow?" }
+    },
+    {
+      "role": "model",
+      "parts": { "text": "What a great question!" }
+    },
+    {
+      "role": "user",
+      "parts": { "text": "Why does it appear when it rains?" }
+    }
+  ],
+  "generation_config": {
+    "temperature": 0
+  }
+}
+EOF
+
+
+Then execute the following command to send your REST request:
+
+    ***
+    Pre-req: glcoud auth login
+    ***
+
+
+curl -X POST \
+     -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+     -H "Content-Type: application/json; charset=utf-8" \
+     -d @request.json \
+     "https://us-east4-aiplatform.googleapis.com/v1/projects/qwiklabs-gcp-04-fe7eb8af5d26/locations/us-east4/publishers/google/models/gemini-1.0-pro:generateContent"
+
+
+
+OUTPUT
+
+
+            curl -X POST \
+            -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+            -H "Content-Type: application/json; charset=utf-8" \
+            -d @request.json \
+            "https://us-east4-aiplatform.googleapis.com/v1/projects/qwiklabs-gcp-04-fe7eb8af5d26/locations/us-east4/publishers/google/models/gemini-1.0-pro:generateContent"
+        {
+        "candidates": [
+            {
+            "content": {
+                "role": "model",
+                "parts": [
+                {
+                    "text": "The colors of a rainbow are caused by the refraction and reflection of sunlight through water droplets in the air. When sunlight enters a water droplet, it is bent, or refracted. The different colors of light are bent at different angles, causing them to separate. The light is then reflected off the back of the water droplet and refracted again as it exits the droplet. This separation of colors is what we see as a rainbow.\n\nRainbows are most commonly seen after a rain shower, when there are many water droplets in the air. The sun must also be shining at a low angle, so that the light can be refracted through the water droplets. Rainbows are always seen in the opposite direction of the sun.\n\nThe colors of a rainbow are always in the same order: red, orange, yellow, green, blue, indigo, and violet. This is because the different colors of light are bent at different angles, with red light being bent the least and violet light being bent the most.\n\nRainbows are a beautiful and fascinating natural phenomenon. They are a reminder of the power of light and the beauty of the natural world."
+                }
+                ]
+            },
+            "finishReason": "STOP",
+            "safetyRatings": [
+                {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "probability": "NEGLIGIBLE",
+                "probabilityScore": 0.049560547,
+                "severity": "HARM_SEVERITY_NEGLIGIBLE",
+                "severityScore": 0.0390625
+                },
+                {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "probability": "NEGLIGIBLE",
+                "probabilityScore": 0.08251953,
+                "severity": "HARM_SEVERITY_NEGLIGIBLE",
+                "severityScore": 0.04272461
+                },
+                {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "probability": "NEGLIGIBLE",
+                "probabilityScore": 0.068359375,
+                "severity": "HARM_SEVERITY_NEGLIGIBLE",
+                "severityScore": 0.021606445
+                },
+                {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "probability": "NEGLIGIBLE",
+                "probabilityScore": 0.1328125,
+                "severity": "HARM_SEVERITY_NEGLIGIBLE",
+                "severityScore": 0.03173828
+                }
+            ],
+            "avgLogprobs": -0.10025470567786175
+            }
+        ],
+        "usageMetadata": {
+            "promptTokenCount": 22,
+            "candidatesTokenCount": 230,
+            "totalTokenCount": 252
+        },
+        "modelVersion": "gemini-1.0-pro-002"
+        }
+
+
+###################
+Task 2. Open the notebook in Vertex AI Workbench
+
+In the Google Cloud Console, on the Navigation menu, click Vertex AI > Workbench.
+
+Find the generative-ai-jupyterlab instance and click on the Open JupyterLab button.
+
+JupNotebook links:
+    https://cloud.google.com/vertex-ai/generative-ai/docs/multimodal/function-calling#function-calling-generation-sdk-sample
+    https://cloud.google.com/vertex-ai/generative-ai/docs/reference/python/latest/vertexai.generative_models
+
+    
+
+    
+
+
+
+###################
+
+
+###################
+
+
+###################
