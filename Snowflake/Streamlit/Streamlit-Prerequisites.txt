@@ -3,6 +3,8 @@
 * Use Anaconda to configure an environment for Streamlit
     docs.streamlit.io/get-started/installation/anaconda-distribution#create-an-environment-using-anaconda-navigator
 
+    conda activate /opt/anaconda3/envs/streamlitenv
+
 
 * Install Streamlit 
     >> https://docs.streamlit.io/get-started/installation/anaconda-distribution
@@ -21,6 +23,8 @@
 
         st.write("Hello World")
 
+
+** INSTALL notes - pay attention to the environments. You have a "streamlit" environment, but it's part of the base package.
 
 
 
